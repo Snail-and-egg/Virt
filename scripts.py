@@ -620,6 +620,7 @@ if __name__ == '__main__':
             f.write(str(i)+','+str(cov[i])+','+str(le[i])+'\n')
             
     '''
+    '''
 # 1  
 # График зависимости покрытия от GC-контента
     name = 'EColi_O157_PCRfree'
@@ -639,11 +640,11 @@ if __name__ == '__main__':
     graph(name+'_'+str(step),'GC-content',['Coverage'],['Coverage of GC'],gcp,cov[:-1], typ = '.',
           two_axis='no',graphs=1,lines=1,show='show',log='no',figsize=(15,8),
           dpi=80,linewidth=1,color=['green','purple','orange','blue'])
-    '''print('Writing  coverage/gc-content data into a file...')
+    print('Writing  coverage/gc-content data into a file...')
     with open(name+'_gc_cov_'+str(step)+'.csv','w') as f:
         f.write('cov,gc-cont\n')
         for i in range(len(gcp)):
-            f.write(str(cov[i])+','+str(gcp[i])+'\n')'''
+            f.write(str(cov[i])+','+str(gcp[i])+'\n')
 
 # Линейная регрессия графика зависимости покрытия от GC-контента
     from sklearn import linear_model
@@ -658,7 +659,7 @@ if __name__ == '__main__':
     print('Write predicting data into a file')
     with open(name+'_predict_'+str(step)+'.txt', 'w') as f:
         for i in y:
-            f.write(i+'\n')
+            f.write(str(i)+'\n')
     print('Plot a graph of predicting data')
     from matplotlib import pyplot as plt
 #    plt.plot(gcp, cov[:-1], color='b',label='real')
@@ -676,8 +677,21 @@ if __name__ == '__main__':
     plt.show()
 
     # Модделирование ридов на основе полученной модели GC-покрытия
-    from virt_reads import do_reads2
-    do_reads2(name='EColi_O157_PCRfree')
+    from virt_reads import do_reads_with_ready_cov
+    do_reads_with_ready_cov(name='EColi_O157_EDL933', gc = y, r_len=100,error=0.05, paired = True, gap=210, step=step)
+    
+    '''
+
+    #2 Кореляция двух покрытий
+    name1 = 'EColi_O157_PCRfree'
+    name2 = 'EColi_O157_virt3'
+    step=1000
+    cov1 = cov_average(name=name1,win=step,step=step,prog='return',repair='yes')
+    cov2 = cov_average(name=name2,win=step,step=step,prog='return',repair='yes')
+    from scipy.stats.stats import pearsonr
+    cor = pearsonr(cov1,cov2)
+    print(cor)
+    
     
     
     '''

@@ -62,6 +62,47 @@ def do_reads2(name='EColi_O157',r_len=100,cov=1,error=0.05, paired = True, gap=2
                             p.write('>#'+str(i)+' | pos='+str(begin+began)+'\n')
                             p.write(''.join([comp[i] for i in genome[began+begin+r_len-1:began+begin-1:-1]])+'\n')
                         #p.write(genome[began+begin:began+begin+r_len]+'\n')
+def do_reads_with_ready_cov(name='EColi_O157', gc = [], r_len=100,error=0.05, paired = True, gap=210, step=1000):
+    from scripts import ref, gc_content
+    from math import ceil, fabs
+    from random import randint, random, normalvariate
+    version = 0.1
+    genome = ref(name)
+    g_len = len(genome)
+    comp = {'A':'T','C':'G','G':'C','T':'A'}
+    print('Genome length = '+str(g_len))
+    print('Starting read modeling')
+    with open(name+'_virt_with_cov_'+str(r_len)+'_'+'_'+str(version)+'.metadata.txt','w') as g:
+        g.write('version = '+str(version)+'\nname = '+name+'\ngenome legth = '+str(g_len)+
+                '\nread legth = '+str(r_len))
+        if paired == False:
+            with open(name+'_virt_with_cov_'+str(r_len)+'_'+str(version)+'.fasta','w') as f:
+                for t in range(0,g_len//step):
+                    M = ceil(step/(r_len-r_len*error) * gc[t])
+                    for i in range(M):
+                        begin = randint(step*t,step*t+step)
+                        if round(random()) == 0:
+                            f.write('>#'+str(i)+' | pos='+str(begin)+'\n')
+                            f.write(genome[begin:begin+r_len]+'\n')
+                        else:
+                            f.write('>#'+str(i)+' | pos='+str(begin)+'\n')
+                            f.write(''.join([comp[i] for i in genome[begin+r_len-1:begin-1:-1]])+'\n')
+        else:
+            with open(name+'_virt_with_cov_'+str(r_len)+'_'+str(version)+'1.fasta','w') as f:
+                with open(name+'_virt_with_cov_'+str(r_len)+'_'+str(version)+'2.fasta','w') as p:
+                    for t in range(0,g_len//step):
+                        M = ceil(step/(r_len-r_len*error) * gc[t])
+                        for i in range(M//2):
+                            began = round(normalvariate(gap,gap*0.05))
+                            #began = gap
+                            begin = randint(step*t,step*t+step)
+                            f.write('>#'+str(i)+' | pos='+str(begin)+'\n')
+                            f.write(genome[begin:begin+r_len]+'\n')
+                            p.write('>#'+str(i)+' | pos='+str(begin+began)+'\n')
+                            p.write(''.join([comp[i] for i in genome[began+begin+r_len-1:began+begin-1:-1]])+'\n')
+                        #p.write(genome[began+begin:began+begin+r_len]+'\n')
+                    
+
                     
 if __name__ == '__main__':
     step = 1000
